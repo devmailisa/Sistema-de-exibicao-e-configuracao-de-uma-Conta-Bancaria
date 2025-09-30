@@ -44,25 +44,26 @@ public class Conta {
 
     public boolean sacar(BigDecimal valor){
         BigDecimal saldoAtual = this.saldo;
-        BigDecimal chequeEspecial = this.chequeEspecial;
-        BigDecimal valorAtual = saldoAtual;
-        if(saldoAtual.compareTo(valor) < 0){
-            //precisa do cheque especial
-            BigDecimal disponibilidadeChequeEspecial = chequeEspecial.subtract(valorChequeEspecialUsado);
-            if(disponibilidadeChequeEspecial.compareTo(ZERO) > 0){
-                valorAtual = saldoAtual.add(chequeEspecial);
-                this.valorChequeEspecialUsado = valor.subtract(saldoAtual);
-                this.usaChequeEspecial = true;
-            }
-        }
 
-        boolean ehPossivel = valorAtual.compareTo(valor) >= 0; //dá pra sacar
-        if(ehPossivel){
-            this.saldo = valorAtual.subtract(valor);
+        if(saldoAtual.compareTo(valor) < 0){ //Precisa do cheque especial
+
+            BigDecimal diferenca = valor.subtract(saldoAtual);
+            BigDecimal valorDisponivelChequeEspecial = chequeEspecial.subtract(valorChequeEspecialUsado);
+
+            if(diferenca.compareTo(valorDisponivelChequeEspecial) <= 0){ //Se o valor que precisa para completar puder ser emprestado
+                this.saldo = ZERO;
+                this.valorChequeEspecialUsado = this.valorChequeEspecialUsado.subtract(diferenca); //Usou a diferença
+                this.usaChequeEspecial = true;
+                return true;
+            }else
+            {
+                return false;
+            }
+        }else{
+            this.saldo = saldoAtual.subtract(valor);
             return true;
         }
 
-        return false;
     }
 
     public boolean getUsaChequeEspecial(){
@@ -75,6 +76,19 @@ public class Conta {
 
     public void setUsaChequeEspecial(boolean value){
         this.usaChequeEspecial = value;
+    }
+
+    //So deve ser chamado quando o valor do saldo for suficiente para pagar o valor de 20% do cheque
+    //Olhar novamente isso
+    public void cobrarChequeEspecial(){
+        BigDecimal debito = this.valorChequeEspecialUsado.multiply(BigDecimal.valueOf(0.2));
+        this.valorChequeEspecialUsado = this.valorChequeEspecialUsado.subtract(debito);
+
+        if(this.valorChequeEspecialUsado.compareTo(ZERO) == 0){
+            this.usaChequeEspecial = false;
+        }
+
+        this.saldo = this.saldo.subtract(debito);
     }
 
 
