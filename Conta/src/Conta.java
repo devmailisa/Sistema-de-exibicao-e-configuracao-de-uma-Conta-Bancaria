@@ -79,16 +79,19 @@ public class Conta {
     }
 
     //So deve ser chamado quando o valor do saldo for suficiente para pagar o valor de 20% do cheque
-    //Olhar novamente isso
-    public void cobrarChequeEspecial(){
+    //OLHAR AQUI
+    public boolean cobrarChequeEspecial(){
         BigDecimal debito = this.valorChequeEspecialUsado.multiply(BigDecimal.valueOf(0.2));
-        this.valorChequeEspecialUsado = this.valorChequeEspecialUsado.subtract(debito);
-
-        if(this.valorChequeEspecialUsado.compareTo(ZERO) == 0){
-            this.usaChequeEspecial = false;
+        if(this.saldo.compareTo(debito) >= 0){
+            this.valorChequeEspecialUsado = this.valorChequeEspecialUsado.subtract(debito);
+            if(this.valorChequeEspecialUsado.compareTo(ZERO) == 0){
+                this.usaChequeEspecial = false;
+            }
+            this.saldo = this.saldo.subtract(debito);
+            return true;
         }
-
-        this.saldo = this.saldo.subtract(debito);
+        
+        return false;
     }
 
 
