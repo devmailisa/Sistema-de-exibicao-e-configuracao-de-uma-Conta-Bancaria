@@ -1,18 +1,15 @@
 import java.math.BigDecimal;
 
-import static java.math.BigDecimal.ZERO;
-
 public class Conta {
 
     private BigDecimal saldo;
     private final BigDecimal chequeEspecial;
 
     private boolean usaChequeEspecial = false;
-    private BigDecimal valorChequeEspecialUsado = ZERO;
 
-    private final BigDecimal definirChequeEspecial(BigDecimal saldoInicial){
+    private BigDecimal definirChequeEspecial(BigDecimal saldoInicial){
         final BigDecimal QUINHENTOS = BigDecimal.valueOf(500);
-        boolean condicao = QUINHENTOS.compareTo(saldoInicial) < 0; //cheque de 50%
+        boolean condicao = saldoInicial.compareTo(QUINHENTOS) >= 0; //cheque de 50%
         if (condicao){
             return saldoInicial.multiply(BigDecimal.valueOf(0.5));
         }
@@ -29,10 +26,6 @@ public class Conta {
         return this.saldo;
     }
 
-    public void setSaldo(BigDecimal novoSaldo){
-        this.saldo = novoSaldo;
-    }
-
     public BigDecimal getChequeEspecial(){
         return this.chequeEspecial;
     }
@@ -45,20 +38,17 @@ public class Conta {
     public boolean sacar(BigDecimal valor){
         BigDecimal saldoAtual = this.saldo;
 
-        if(saldoAtual.compareTo(valor) < 0){ //Precisa do cheque especial
+        if(saldoAtual.compareTo(valor) < 0){ //Se o saldo atual não for sufiente para o saque
 
             BigDecimal diferenca = valor.subtract(saldoAtual);
-            BigDecimal valorDisponivelChequeEspecial = chequeEspecial.subtract(valorChequeEspecialUsado);
 
-            if(diferenca.compareTo(valorDisponivelChequeEspecial) <= 0){ //Se o valor que precisa para completar puder ser emprestado
-                this.saldo = ZERO;
-                this.valorChequeEspecialUsado = this.valorChequeEspecialUsado.subtract(diferenca); //Usou a diferença
+            //Se o valor que precisa para completar puder ser emprestado
+            if(!this.usaChequeEspecial && diferenca.compareTo(this.chequeEspecial) <= 0){
+                this.saldo = saldoAtual.add(this.chequeEspecial).subtract(valor);
                 this.usaChequeEspecial = true;
                 return true;
-            }else
-            {
-                return false;
-            }
+            }else{return false;}
+
         }else{
             this.saldo = saldoAtual.subtract(valor);
             return true;
@@ -70,27 +60,18 @@ public class Conta {
         return this.usaChequeEspecial;
     }
 
-    public BigDecimal getValorChequeEspecialUsado(){
-        return this.valorChequeEspecialUsado;
-    }
-
-    public void setUsaChequeEspecial(boolean value){
-        this.usaChequeEspecial = value;
-    }
-
     //So deve ser chamado quando o valor do saldo for suficiente para pagar o valor de 20% do cheque
-    //OLHAR AQUI
+    //Olhar novamente isso
     public boolean cobrarChequeEspecial(){
-        BigDecimal debito = this.valorChequeEspecialUsado.multiply(BigDecimal.valueOf(0.2));
-        if(this.saldo.compareTo(debito) >= 0){
-            this.valorChequeEspecialUsado = this.valorChequeEspecialUsado.subtract(debito);
-            if(this.valorChequeEspecialUsado.compareTo(ZERO) == 0){
-                this.usaChequeEspecial = false;
-            }
-            this.saldo = this.saldo.subtract(debito);
+        BigDecimal saldo = this.saldo;
+        BigDecimal valor = this.chequeEspecial;
+        if(saldo.compareTo(valor) >= 0){
+            this.saldo = saldo.subtract(valor);
+            this.usaChequeEspecial = false;
+
             return true;
         }
-        
+
         return false;
     }
 
