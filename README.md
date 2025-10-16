@@ -48,7 +48,4 @@ Isso garante maior **segurança** e **controle sobre o estado** do objeto.
 ### 🧱 Abstração
 A classe **ContaBancaria** representa uma **abstração** do mundo real, expondo apenas os métodos necessários para interação com a conta, sem revelar detalhes internos de implementação.
 
----
-
-## 🧾 Estrutura do Projeto
 
